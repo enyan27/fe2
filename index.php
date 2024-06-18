@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
+    <title>えにゃん</title>
     <link rel="stylesheet" href="./public/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./public/css/bootstrap.min.css">
     <link rel="stylesheet" href="./public/css/styles.css">
@@ -11,7 +11,13 @@
 
 <body>
     <div class="front">
-        <button class="btn btn-secondary loadmore">Load more</button>
+        <div class="search-bar">
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+              </form>
+        </div>
+        <button class="btn btn-danger loadmore fw-bold">Load more</button>
         <div class="my-container"></div>
     </div>
 

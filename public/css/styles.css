@@ -91,3 +91,9 @@ body {
     bottom: 20%;
     z-index: 99;
 }
+
+.search-bar {
+    position: fixed;
+    top: 20%;
+    z-index: 99;
+}

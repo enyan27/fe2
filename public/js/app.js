@@ -60,6 +60,15 @@ const createBox = ({ id, src, loves, clicks }, container) => {
 
     box.appendChild(bar);
     container.appendChild(box);
+    
+    btnLoves.addEventListener('click', async (e) => { // Sự kiện tăng lượt loves
+        e.preventDefault();
+        const success = await incrementLoves(id);
+        if (success) {
+            const lovesSpan = btnLoves.querySelector('span');
+            lovesSpan.textContent = parseInt(lovesSpan.textContent) + 1;
+        }
+    });
 };
 
 const createBoxesFromData = async (container, page) => {
@@ -69,6 +78,8 @@ const createBoxesFromData = async (container, page) => {
     
     if (images.length === 0 || state.loadedImages >= state.totalImages) {
         document.querySelector('.loadmore').style.display = 'none';
+    } else {
+        document.querySelector('.loadmore').style.display = 'block';
     }
     
     images.forEach(image => createBox(image, container));
@@ -76,6 +87,11 @@ const createBoxesFromData = async (container, page) => {
 
 const loadMore = async (page) => {
     const response = await fetch(`app/api/loadmore.php?page=${page}`);
+    return response.json();
+};
+
+const searchImages = async (keyword) => {
+    const response = await fetch(`app/api/search.php?keyword=${keyword}`);
     return response.json();
 };
 
@@ -96,14 +112,26 @@ const incrementClicks = async (id) => {
     return response.ok;
 };
 
+const incrementLoves = async (id) => {
+    const formData = new FormData();
+    formData.append('id', id);
+
+    const response = await fetch(`app/api/incrementLoves.php`, {
+        method: 'POST',
+        body: formData
+    });
+    
+    return response.ok;
+};
+
 const showImageDetails = ({ name, src, content }) => {
     document.querySelector('#exampleModalLabel').textContent = name;
     document.querySelector('.modal-body').innerHTML = `
         <div class="row">
-            <div class="col-4">
+            <div class="col-6">
                 <img src="public/images/${src}" alt="${name}" class="img-fluid">
             </div>
-            <div class="col-8">
+            <div class="col-6">
                 <p>${content}</p>
             </div>
         </div>
@@ -111,7 +139,7 @@ const showImageDetails = ({ name, src, content }) => {
 };
 
 const getRandomPosition = (max) => Math.floor(Math.random() * max);
-
+// DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.my-container');
     createBoxesFromData(container, state.currentPage);
@@ -121,9 +149,32 @@ document.addEventListener('DOMContentLoaded', () => {
         createBoxesFromData(container, state.currentPage);
     });
 
-    container.addEventListener('click', async (e) => {
-        const box = e.target.closest('.box');
-        if (box) {
+    const searchForm = document.querySelector('.search-bar form');
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const keyword = searchForm.querySelector('input').value.trim();
+        container.innerHTML = '';
+        if (keyword) {
+            const { images } = await searchImages(keyword);
+            if (images.length > 0) {
+                images.forEach(image => createBox(image, container));
+                document.querySelector('.loadmore').style.display = 'none';
+            } else {
+                alert('Không tìm thấy kết quả nào.');
+                document.querySelector('.loadmore').style.display = 'none';
+            }
+        } else {
+            state.currentPage = 1;
+            state.loadedImages = 0;
+            await createBoxesFromData(container, state.currentPage);
+        }
+    });
+
+    container.addEventListener('click', async (event) => {
+        const box = event.target.closest('.box');
+        const btnClicks = event.target.closest('.btn-clicks');
+
+        if (box && !btnClicks) {
             const imageDetails = await getImageDetails(box.dataset.id);
             showImageDetails(imageDetails);
             const success = await incrementClicks(box.dataset.id);
@@ -134,6 +185,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-//  Todo: Completed Loadmore, GetDetails, IncrementViews
-//  Todo: Loves, search

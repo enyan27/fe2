@@ -8,5 +8,5 @@ $imageModel = new ImageModel();
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
 if ($id > 0) {
-    $imageModel->incrementClicks($id);
+    $imageModel->incrementLoves($id);
 }
