@@ -1,0 +1,93 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    perspective: 1200px;
+}
+
+.front {
+    position: absolute;
+    width: 150vw;
+    height: 150vh;
+    top: -25%;
+    left: -25%;
+
+    background: url(../images/stars-galaxy-3840x2560-10307.jpg);
+    background-size: cover;
+    background-position: 50%;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    perspective: 1000px;
+    overflow: hidden;
+}
+
+.my-container {
+    position: relative;
+    height: 70vh;
+    width: 70vw;
+    /* background: tan; */
+
+    transform-style: preserve-3d;
+    transition: all .4s ease-out;
+}
+
+.box {
+    position: absolute;
+    height: 190px;
+    width: 150px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 1);
+    transition: all .3s ease-out;
+}
+
+.box:hover {
+    box-shadow: 0 0 15px yellow;
+    transform: translateZ(300px) scale(1.05) !important;
+    filter: brightness(1.5) !important;
+}
+
+.picture {
+    height: 150px;
+    width: 150px;
+    background: linear-gradient(to right, #EDF1F4, #C3CBDC);
+    /* background: url(../images/Fb4frF_aIAA_yXs.jpg) no-repeat; */
+    /* background-size: cover;
+    background-position: 50%; */
+}
+
+.bar {
+    height: 40px;
+    width: 150px;
+    background-color: rgba(0, 0, 0, .6);
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.btn-loves, .btn-clicks {
+    height: 30px;
+    width: 50px;
+    background: none;
+    line-height: 15px;
+    border: none;
+    color: rgba(255, 255, 255, .7);
+    margin-left: 5px;
+}
+
+.btn-loves span, .btn-clicks span {
+    margin-left: 5px;
+}
+
+.loadmore {
+    position: fixed;
+    bottom: 20%;
+    z-index: 99;
+}
