@@ -4,64 +4,56 @@ const state = {
     loadedImages: 0
 };
 
-document.addEventListener('mousemove', ({ clientX, clientY }) => {
-    const front = document.querySelector('.front');
-    const container = document.querySelector('.my-container');
-    const { left, top, width, height } = container.getBoundingClientRect();
-    
-    const containerCenterX = left + width / 2;
-    const containerCenterY = top + height / 2;
-    
-    const deltaX = clientX - containerCenterX;
-    const deltaY = clientY - containerCenterY;
-    
-    const rotateX = (deltaY / window.innerHeight) * 60;
-    const rotateY = (deltaX / window.innerWidth) * -60;
-    
-    container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    front.style.transform = `rotateX(${rotateX / 3}deg) rotateY(${rotateY / 3}deg)`;
-});
+const fetchJSON = async (url, options) => {
+    const response = await fetch(url, options);
+    return response.json();
+};
+
+const getRandomPosition = (max) => Math.floor(Math.random() * max);
 
 const createBox = ({ id, src, loves, clicks }, container) => {
     const box = document.createElement('div');
     box.className = 'box';
+    // Đề 1:
     box.dataset.bsToggle = 'modal';
     box.dataset.bsTarget = '#exampleModal';
+    // End Đề 1;
     box.dataset.id = id;
 
     box.style.top = `${getRandomPosition(container.clientHeight - 190)}px`;
     box.style.left = `${getRandomPosition(container.clientWidth - 150)}px`;
-    
     const translateZ = getRandomPosition(300);
     box.style.transform = `translateZ(${translateZ}px)`;
-    box.style.filter = `brightness(${0.1 + (translateZ / 200)})`;
+    box.style.filter = `brightness(${0.1 + (translateZ / 300)})`;
 
     const picture = document.createElement('div');
     picture.className = 'picture';
     picture.style.backgroundImage = `url('public/images/${src}')`;
-    picture.style.backgroundSize = 'cover';
-    picture.style.backgroundPosition = 'center';
     box.appendChild(picture);
 
     const bar = document.createElement('div');
     bar.className = 'bar';
 
-    const btnLoves = document.createElement('button');
-    btnLoves.className = 'btn-loves';
+    const createButton = (className, icon, text) => {
+        const button = document.createElement('button');
+        button.className = className;
+        button.innerHTML = `<i class="bi ${icon}"></i><span>${text}</span>`;
+        return button;
+    };
+
+    const btnLoves = createButton('btn-loves', 'bi-heart-fill', loves);
     btnLoves.id = `loves-${id}`;
-    btnLoves.innerHTML = `<i class="bi bi-heart-fill"></i><span>${loves}</span>`;
     bar.appendChild(btnLoves);
 
-    const btnClicks = document.createElement('button');
-    btnClicks.className = 'btn-clicks';
+    const btnClicks = createButton('btn-clicks', 'bi-eye-fill', clicks);
     btnClicks.id = `clicks-${id}`;
-    btnClicks.innerHTML = `<i class="bi bi-eye-fill"></i><span>${clicks}</span>`;
     bar.appendChild(btnClicks);
 
     box.appendChild(bar);
     container.appendChild(box);
-    
-    btnLoves.addEventListener('click', async (e) => { // Sự kiện tăng lượt loves
+
+    // Đề 2:
+    btnLoves.addEventListener('click', async (e) => {
         e.preventDefault();
         const success = await incrementLoves(id);
         if (success) {
@@ -69,61 +61,30 @@ const createBox = ({ id, src, loves, clicks }, container) => {
             lovesSpan.textContent = parseInt(lovesSpan.textContent) + 1;
         }
     });
+     // End Đề 2;
+
+    // Đề 1:
+    btnClicks.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const success = await incrementClicks(id);
+        if (success) {
+            const clicksSpan = btnClicks.querySelector('span');
+            clicksSpan.textContent = parseInt(clicksSpan.textContent) + 1;
+        }
+    });
+    // End Đề 1;
 };
 
 const createBoxesFromData = async (container, page) => {
-    const { images, total } = await loadMore(page);
+    const { images, total } = await fetchJSON(`app/api/loadmore.php?page=${page}`);
     state.totalImages = total;
     state.loadedImages += images.length;
-    
-    if (images.length === 0 || state.loadedImages >= state.totalImages) {
-        document.querySelector('.loadmore').style.display = 'none';
-    } else {
-        document.querySelector('.loadmore').style.display = 'block';
-    }
-    
+
+    document.querySelector('.loadmore').style.display = (images.length === 0 || state.loadedImages >= state.totalImages) ? 'none' : 'block';
     images.forEach(image => createBox(image, container));
 };
 
-const loadMore = async (page) => {
-    const response = await fetch(`app/api/loadmore.php?page=${page}`);
-    return response.json();
-};
-
-const searchImages = async (keyword) => {
-    const response = await fetch(`app/api/search.php?keyword=${keyword}`);
-    return response.json();
-};
-
-const getImageDetails = async (id) => {
-    const response = await fetch(`app/api/getImageDetails.php?id=${id}`);
-    return response.json();
-};
-
-const incrementClicks = async (id) => {
-    const formData = new FormData();
-    formData.append('id', id);
-
-    const response = await fetch(`app/api/incrementClicks.php`, {
-        method: 'POST',
-        body: formData
-    });
-
-    return response.ok;
-};
-
-const incrementLoves = async (id) => {
-    const formData = new FormData();
-    formData.append('id', id);
-
-    const response = await fetch(`app/api/incrementLoves.php`, {
-        method: 'POST',
-        body: formData
-    });
-    
-    return response.ok;
-};
-
+// Đề 1:
 const showImageDetails = ({ name, src, content }) => {
     document.querySelector('#exampleModalLabel').textContent = name;
     document.querySelector('.modal-body').innerHTML = `
@@ -137,45 +98,75 @@ const showImageDetails = ({ name, src, content }) => {
         </div>
     `;
 };
+// End Đề 1;
 
-const getRandomPosition = (max) => Math.floor(Math.random() * max);
-// DOMContentLoaded
+// Đề 1:
+const incrementClicks = async (id) => {
+    const formData = new FormData();
+    formData.append('id', id);
+
+    const response = await fetch(`app/api/incrementClicks.php`, {
+        method: 'POST',
+        body: formData
+    });
+
+    return response.ok;
+};
+// End Đề 1;
+
+// Đề 2:
+const incrementLoves = async (id) => {
+    const formData = new FormData();
+    formData.append('id', id);
+
+    const response = await fetch(`app/api/incrementLoves.php`, {
+        method: 'POST',
+        body: formData
+    });
+
+    return response.ok;
+};
+// End Đề 2;
+
+// Đề 2:
+const handleSearch = async (e, container) => {
+    e.preventDefault();
+    const keyword = e.target.querySelector('input').value.trim();
+    container.innerHTML = '';
+    if (keyword) {
+        const { images } = await fetchJSON(`app/api/search.php?keyword=${keyword}`);
+        if (images.length) {
+            images.forEach(image => createBox(image, container));
+        } else {
+            alert('Không tìm thấy kết quả nào.');
+        }
+        document.querySelector('.loadmore').style.display = 'none';
+    } else {
+        state.currentPage = 1;
+        state.loadedImages = 0;
+        await createBoxesFromData(container, state.currentPage);
+    }
+};
+// End Đề 2;
+
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.my-container');
     createBoxesFromData(container, state.currentPage);
-    
+
     document.querySelector('.loadmore').addEventListener('click', () => {
         state.currentPage++;
         createBoxesFromData(container, state.currentPage);
     });
 
-    const searchForm = document.querySelector('.search-bar form');
-    searchForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const keyword = searchForm.querySelector('input').value.trim();
-        container.innerHTML = '';
-        if (keyword) {
-            const { images } = await searchImages(keyword);
-            if (images.length > 0) {
-                images.forEach(image => createBox(image, container));
-                document.querySelector('.loadmore').style.display = 'none';
-            } else {
-                alert('Không tìm thấy kết quả nào.');
-                document.querySelector('.loadmore').style.display = 'none';
-            }
-        } else {
-            state.currentPage = 1;
-            state.loadedImages = 0;
-            await createBoxesFromData(container, state.currentPage);
-        }
-    });
+    // Đề 2:
+    document.querySelector('.search-bar form').addEventListener('submit', (e) => handleSearch(e, container));
+    // End Đề 2;
 
+    // Đề 1:
     container.addEventListener('click', async (event) => {
         const box = event.target.closest('.box');
-        const btnClicks = event.target.closest('.btn-clicks');
-
-        if (box && !btnClicks) {
-            const imageDetails = await getImageDetails(box.dataset.id);
+        if (box) {
+            const imageDetails = await fetchJSON(`app/api/getImageDetails.php?id=${box.dataset.id}`);
             showImageDetails(imageDetails);
             const success = await incrementClicks(box.dataset.id);
             if (success) {
@@ -184,4 +175,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    // End Đề 1;
+});
+
+document.addEventListener('mousemove', ({ clientX, clientY }) => {
+    const front = document.querySelector('.front');
+    const container = document.querySelector('.my-container');
+    const { left, top, width, height } = container.getBoundingClientRect();
+
+    const containerCenterX = left + width / 2;
+    const containerCenterY = top + height / 2;
+
+    const deltaX = clientX - containerCenterX;
+    const deltaY = clientY - containerCenterY;
+
+    const rotateX = (deltaY / window.innerHeight) * 60;
+    const rotateY = (deltaX / window.innerWidth) * -60;
+
+    container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    front.style.transform = `rotateX(${rotateX / 3}deg) rotateY(${rotateY / 3}deg)`;
 });

@@ -50,8 +50,8 @@ body {
 
 .box:hover {
     box-shadow: 0 0 15px yellow;
-    transform: translateZ(300px) scale(1.05) !important;
-    filter: brightness(1.5) !important;
+    transform: translateZ(300px) scale(1.1) !important;
+    filter: brightness(1.1) !important;
 }
 
 .picture {
@@ -59,8 +59,8 @@ body {
     width: 150px;
     background: linear-gradient(to right, #EDF1F4, #C3CBDC);
     /* background: url(../images/Fb4frF_aIAA_yXs.jpg) no-repeat; */
-    /* background-size: cover;
-    background-position: 50%; */
+    background-size: cover;
+    background-position: 50%;
 }
 
 .bar {
